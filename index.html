@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Node-Mongo</title>
+  </head>
+  <body class="bg-gray-400 text-white text-center mt-20 p-5 mx-auto">
+    <h1 class="font-bold font-mono text-4xl">Node Mongo Client page</h1>
+    <p id="userName"></p>
+    <p id="userNameInput"></p>
+    <div class="flex items-center justify-center">
+  <!-- Data entry form -->
+      <form action="/addProduct" method="post" class="p-4 mx-auto flex-warp">
+        <label class="font-bold text-lg">Product Name:</label>
+        <input
+          type="text"
+          name="Name"
+          class="p-2 text-black rounded border m-1 mx-auto"
+          placeholder="Enter Product Name"
+        />
+        <br />
+        <label class="font-bold text-lg">Product Price:</label>
+        <input
+          type="text"
+          name="Price"
+          class="p-2 text-black rounded border m-1 mx-auto"
+          placeholder="Enter Product Price"
+        />
+        <br />
+        <label class="font-bold text-lg">Product's Quantity:</label>
+        <input
+          type="number"
+          name="Quantity"
+          class="p-2 text-black rounded border m-1 mx-auto"
+          placeholder="Enter Remaining Product's Quantity"
+        />
+        <br />
+        <button
+          type="submit"
+          class="px-10 py-2 bg-green-500 hover:bg-green-400 border rounded-lg"
+        >
+          Add Product...
+        </button>
+      </form>
+    </div>
+
+    <div id="products"></div>
+
+    <script>
+      function loadProduct(){
+        fetch("/products")
+        .then((res) => res.json())
+        .then((products) => {
+          const container = document.getElementById("products");
+          products.forEach((pd) => {
+            const item = document.createElement("p");
+            item.innerHTML = `Name: ${pd.Name} 
+                              Price: ${pd.Price} 
+                              Quantity: ${pd.Quantity}
+                              <button 
+                                class='border px-3 mx-2'
+                                onclick="handleUpdate('${pd._id}')"
+                              >Update</button>
+                              <button 
+                                class='border px-3 mx-2'
+                                onclick="handleDelete('${pd._id}')"
+                              >Delete</button>`;
+            container.appendChild(item);
+          });
+        });
+      }
+      loadProduct();
+  //Delete item
+      function handleDelete(id){
+        fetch(`/delete/${id}`, {
+          method: 'DELETE'
+        })
+        .then(res => json())
+        .then(result => {
+          console.log('item deleted')
+        res.send('success')
+        })
+      }
+  //Update item
+      function handleUpdate(id){
+        fetch(`/products/${id}`)
+          .then(res=> res.json())
+          .then(data => {
+            console.log(data)
+          })
+      }
+    </script>
+  </body>
+</html>
