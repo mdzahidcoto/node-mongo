@@ -12,7 +12,7 @@
     <p id="userName"></p>
     <p id="userNameInput"></p>
     <div class="flex items-center justify-center">
-  <!-- Data entry form -->
+      <!-- Data entry form -->
       <form action="/addProduct" method="post" class="p-4 mx-auto flex-warp">
         <label class="font-bold text-lg">Product Name:</label>
         <input
@@ -48,48 +48,77 @@
     </div>
 
     <div id="products"></div>
+    <div id="update"></div>
 
     <script>
-      function loadProduct(){
+      //Load product data
+      function loadProduct() {
         fetch("/products")
-        .then((res) => res.json())
-        .then((products) => {
-          const container = document.getElementById("products");
-          products.forEach((pd) => {
-            const item = document.createElement("p");
-            item.innerHTML = `Name: ${pd.Name} 
+          .then((res) => res.json())
+          .then((products) => {
+            const container = document.getElementById("products");
+            container.innerHTML = '';
+            products.forEach((pd) => {
+              const item = document.createElement("p");
+              item.innerHTML = `Name: ${pd.Name} 
                               Price: ${pd.Price} 
                               Quantity: ${pd.Quantity}
                               <button 
                                 class='border px-3 mx-2'
-                                onclick="handleUpdate('${pd._id}')"
+                                onclick="handleLoadToUpdate('${pd._id}')"
                               >Update</button>
                               <button 
                                 class='border px-3 mx-2'
-                                onclick="handleDelete('${pd._id}')"
+                                onclick="handleDelete(event, '${pd._id}')"
                               >Delete</button>`;
-            container.appendChild(item);
+              container.appendChild(item);
+            });
           });
-        });
       }
       loadProduct();
-  //Delete item
-      function handleDelete(id){
-        fetch(`/delete/${id}`, {
-          method: 'DELETE'
-        })
-        .then(res => json())
-        .then(result => {
-          console.log('item deleted')
-        res.send('success')
-        })
-      }
-  //Update item
-      function handleUpdate(id){
-        fetch(`/products/${id}`)
+      //Delete item
+      function handleDelete(event, id){
+        fetch(`/delete/${id}`,{method: 'DELETE'})
           .then(res=> res.json())
-          .then(data => {
-            console.log(data)
+          .then(result => {
+            if(result){
+              if(result) {
+                event.target.parentNode.style.display = 'none';
+              }
+            }
+          })
+      }
+      //Load for Update item
+      function handleLoadToUpdate(id) {
+        fetch(`/products/${id}`)
+          .then((res) => res.json())
+          .then((data) => {
+            const pd = data;
+            const update = document.getElementById("update");
+            update.innerHTML = `<h2>Update: ${pd._id}</h2>
+            <h4>Product Name: ${pd.Name}</h4>
+            <p>Price:<input type='text' value='${pd.Price}' id='price' class='text-black mx-auto my-2 px-2'></p>
+            <br>
+            <p>Quantity:<input type='text' value='${pd.Quantity}' id='quantity' class='text-black mx-auto my-2 px-2'></p>
+            <br>
+            <button onclick="handleUpdateProduct('${pd._id}')">Submit Update</button>`
+          })
+      }
+      //Update items
+      function handleUpdateProduct(id){
+        const price = document.getElementById("price").value;
+        const quantity = document.getElementById("quantity").value;
+        const product = {price, quantity};
+        fetch(`/update/${id}`, {
+          method: 'PATCH',
+          headers: {'content-Type': 'application/json'},
+          body: JSON.stringify(product)
+        })
+          .then(res=> res.json())
+          .then(result=> {
+            if(result){
+              loadProduct();
+            }
           })
       }
     </script>
